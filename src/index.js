@@ -25,6 +25,14 @@ const App = ()=> {
     }
   }
 
+  const getHeader = () => {
+    return {
+        headers: {
+          authorization: window.localStorage.getItem('token')
+        }
+    }
+  }
+
   useEffect(() => {
     attemptLoginWithToken()
   },[])
@@ -38,25 +46,26 @@ const App = ()=> {
   }, []);
 
   useEffect(()=> {
-    const fetchData = async()=> {
-      const response = await axios.get('/api/orders');
-      setOrders(response.data);
-    };
-    fetchData();
-  }, []);
+    if(auth.id){
+      const fetchData = async()=> {
+        const response = await axios.get('/api/orders', getHeader());
+        setOrders(response.data);
+      };
+      fetchData();
+    }
+  }, [auth]);
 
   useEffect(()=> {
-    const fetchData = async()=> {
-      const response = await axios.get('/api/lineItems');
-      setLineItems(response.data);
-    };
-    fetchData();
-  }, []);
+    if(auth.id){
+      const fetchData = async()=> {
+        const response = await axios.get('/api/lineItems', getHeader());
+        setLineItems(response.data);
+      };
+      fetchData();
+    }
+  }, [auth]);
 
-  const cart = orders.find((order) => {return order.is_cart});
-  if(!cart){
-    return null;
-  }
+  const cart = orders.find((order) => {return order.is_cart}) || {};
 
   const createLineItem = async(product)=> {
     const response = await axios.post('/api/lineItems', {
@@ -77,13 +86,13 @@ const App = ()=> {
   };
 
   const updateOrder = async(order)=> {
-    await axios.put(`/api/orders/${order.id}`, order);
-    const response = await axios.get('/api/orders');
+    await axios.put(`/api/orders/${order.id}`, order, getHeader());
+    const response = await axios.get('/api/orders', getHeader());
     setOrders(response.data);
   };
 
   const removeFromCart = async(lineItem)=> {
-    await axios.delete(`/api/lineItems/${lineItem.id}`);
+    await axios.delete(`/api/lineItems/${lineItem.id}`, getHeader());
     setLineItems(lineItems.filter( _lineItem => _lineItem.id !== lineItem.id));
   };
 
