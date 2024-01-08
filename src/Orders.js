@@ -17,7 +17,7 @@ const Orders = ({ orders, products, lineItems })=> {
                       const product = products.find(product => product.id === lineItem.product_id);
                       return (
                         <li key={ lineItem.id }>
-                          { product ? product.name: '' }
+                          { product ? product.name: '' } ({ lineItem.quantity }) Order Price: ${product.price/100 * lineItem.quantity}.00
                         </li>
                       );
                     })

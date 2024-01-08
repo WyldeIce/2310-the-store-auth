@@ -21,6 +21,7 @@ const fetchProducts = async()=> {
   const SQL = `
     SELECT *
     FROM products
+    ORDER BY name ASC
   `;
   const response = await client.query(SQL);
   return response.rows;
@@ -87,11 +88,11 @@ const createUser = async(user) => {
 
 const createProduct = async(product)=> {
   const SQL = `
-    INSERT INTO products (id, name)
-    VALUES($1, $2)
+    INSERT INTO products (id, name, price, description)
+    VALUES($1, $2, $3, $4)
     RETURNING *
   `;
-  const response = await client.query(SQL, [ uuidv4(), product.name]);
+  const response = await client.query(SQL, [ uuidv4(), product.name, product.price, product.description]);
   return response.rows[0];
 };
 
@@ -192,7 +193,9 @@ const seed = async()=> {
     CREATE TABLE products(
       id UUID PRIMARY KEY,
       created_at TIMESTAMP DEFAULT now(),
-      name VARCHAR(100) UNIQUE NOT NULL
+      name VARCHAR(100) UNIQUE NOT NULL,
+      price INTEGER NOT NULL,
+      description TEXT
     );
 
     CREATE TABLE orders(
@@ -221,10 +224,10 @@ const seed = async()=> {
   ])
 
   const [foo, bar, bazz, quq] = await Promise.all([
-    createProduct({ name: 'foo' }),
-    createProduct({ name: 'bar' }),
-    createProduct({ name: 'bazz' }),
-    createProduct({ name: 'quq' }),
+    createProduct({ name: 'foo', price: 200, description: 'foo is the number 1 favorite option of our instructor, with its very affordable price!' }),
+    createProduct({ name: 'bar', price: 400, description: 'bar is the number 2 favorite option of our instructor, it is not as efficient as foo, but gets the job done!' }),
+    createProduct({ name: 'bazz', price: 800, description: 'bazz is the number 3 favorite option of our instructor, recently it has seen a price increase.' }),
+    createProduct({ name: 'quq', price: 1200, description: 'quq is the number 4 favorite option of our instructor primarily due to the increase in price.' }),
   ]);
   let orders = await fetchOrders();
   let cart = orders.find(order => order.is_cart);
